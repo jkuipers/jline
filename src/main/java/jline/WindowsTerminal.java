@@ -299,7 +299,7 @@ public class WindowsTerminal extends Terminal {
 
     private void loadLibrary(final String name) throws IOException {
         // store the DLL in the temporary directory for the System
-        String version = getClass().getPackage().getImplementationVersion();
+        String version = WindowsTerminal.class.getPackage().getImplementationVersion();
 
         if (version == null) {
             version = "";
@@ -319,11 +319,11 @@ public class WindowsTerminal extends Terminal {
         if (System.getProperty("os.arch").indexOf("64") != -1)
             bits = 64;
 
-        InputStream in = new BufferedInputStream(getClass()
-            .getResourceAsStream(name + bits + ".dll"));
+        InputStream in = new BufferedInputStream(WindowsTerminal.class.getResourceAsStream(name + bits + ".dll"));
 
+        OutputStream fout = null;
         try {
-            OutputStream fout = new BufferedOutputStream(
+            fout = new BufferedOutputStream(
                     new FileOutputStream(f));
             byte[] bytes = new byte[1024 * 10];
 
@@ -331,7 +331,6 @@ public class WindowsTerminal extends Terminal {
                 fout.write(bytes, 0, n);
             }
 
-            fout.close();
         } catch (IOException ioe) {
             // We might get an IOException trying to overwrite an existing
             // jline.dll file if there is another process using the DLL.
@@ -339,6 +338,14 @@ public class WindowsTerminal extends Terminal {
             if (!exists) {
                 throw ioe;
             }
+        } finally {
+        	if (fout != null) {
+        		try {
+        			fout.close();
+        		} catch (IOException ioe) {
+        			// ignore
+        		}
+        	}
         }
 
         // try to clean up the DLL after the JVM exits
@@ -412,20 +419,10 @@ public class WindowsTerminal extends Terminal {
         return false;
     }
 
-    /**
-     * Unsupported; return the default.
-     *
-     * @see Terminal#getTerminalWidth
-     */
     public int getTerminalWidth() {
         return getWindowsTerminalWidth();
     }
 
-    /**
-     * Unsupported; return the default.
-     *
-     * @see Terminal#getTerminalHeight
-     */
     public int getTerminalHeight() {
         return getWindowsTerminalHeight();
     }
@@ -470,7 +467,7 @@ public class WindowsTerminal extends Terminal {
     }
 
     public InputStream getDefaultBindings() {
-        return getClass().getResourceAsStream("windowsbindings.properties");
+        return WindowsTerminal.class.getResourceAsStream("windowsbindings.properties");
     }
     
     /**

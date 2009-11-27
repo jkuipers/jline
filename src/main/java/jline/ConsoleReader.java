@@ -149,7 +149,6 @@ public class ConsoleReader implements ConsoleOperations {
 
 	private Map triggeredActions = new HashMap();
 
-
 	/**
 	 * Adding a triggered Action allows to give another curse of action
 	 * if a character passed the preprocessing.
@@ -410,10 +409,12 @@ public class ConsoleReader implements ConsoleOperations {
      */
     int countPrintableCharacters(String s) {
         int count = 0;
-        if (s != null && s.length()>0) {
-            for (int i = 0; i < s.length(); i++) {
-                if (s.charAt(i) == 27) {
-                    i=i+3;
+        if (s != null) {
+            int len = s.length();
+            for (int i = 0; i < len; i++) {
+                if (s.charAt(i) == 27 && i < len - 1 && s.charAt(i + 1) == '[') {  // CSI
+                    i++; // skip the '[', as it matches the condition below
+                    do { i++; } while (i < len && (s.charAt(i) < 64 || s.charAt(i) > 126));
                 } else if (s.charAt(i) >= 32 && s.charAt(i) < 127) {
                     count++;
                 }
@@ -461,7 +462,7 @@ public class ConsoleReader implements ConsoleOperations {
     }
 
     int getCursorPosition() {
-        return ((prompt == null) ? 0 : countPrintableCharacters(prompt)) + buf.cursor;
+        return countPrintableCharacters(prompt) + buf.cursor;
     }
 
     public String readLine(final String prompt) throws IOException {
@@ -1434,7 +1435,7 @@ public class ConsoleReader implements ConsoleOperations {
     }
 
     /**
-     * Move the cursor <i>where</i> characters, withough checking the current
+     * Move the cursor <i>where</i> characters, without checking the current
      * buffer.
      *
      * @param where
@@ -1535,7 +1536,7 @@ public class ConsoleReader implements ConsoleOperations {
     private final int delete (final int num)
     throws IOException
     {
-    	/* Commented out beacuse of DWA-2949:
+    	/* Commented out because of DWA-2949:
            if (buf.cursor == 0)
                        return 0;*/
 
