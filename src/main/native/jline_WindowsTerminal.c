@@ -35,7 +35,15 @@ JNIEXPORT void JNICALL Java_jline_WindowsTerminal_setConsoleMode
 
 JNIEXPORT jint JNICALL Java_jline_WindowsTerminal_readByte (JNIEnv * env, jclass class)
 {
-	return getch ();
+	HANDLE inputHandle = GetStdHandle (STD_INPUT_HANDLE);
+    DWORD read_chars;
+    jint in_chars[1];
+    ReadConsole(inputHandle,
+                in_chars,
+                1,
+                &read_chars,
+                NULL);
+    return in_chars[0];
 }
 
 JNIEXPORT jint JNICALL Java_jline_WindowsTerminal_getWindowsTerminalWidth (JNIEnv * env, jclass class)
